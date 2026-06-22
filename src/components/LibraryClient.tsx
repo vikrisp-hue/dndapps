@@ -559,6 +559,7 @@ export function LibraryClient({ library, supabaseStatus }: LibraryClientProps) {
   const [sessions, setSessions] = useState(library.sessions);
   const [scenes, setScenes] = useState(library.scenes);
   const [references, setReferences] = useState(library.references);
+  const [isHydratedFromStorage, setIsHydratedFromStorage] = useState(false);
   const [mode, setMode] = useState<AppMode>("editor");
   const [query, setQuery] = useState("");
   const [isFindVisible, setIsFindVisible] = useState(false);
@@ -575,6 +576,38 @@ export function LibraryClient({ library, supabaseStatus }: LibraryClientProps) {
   const [openedSessionIds, setOpenedSessionIds] = useState<string[]>(firstSessionId ? [firstSessionId] : []);
   const [activeSessionId, setActiveSessionId] = useState(firstSessionId);
   const [activeSceneId, setActiveSceneId] = useState("");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("dm-script-web-state-v1");
+      if (saved) {
+        const parsed = JSON.parse(saved) as {
+          sessions?: DmSession[];
+          scenes?: DmScene[];
+          references?: DmReferenceTarget[];
+        };
+        if (parsed.sessions?.length) setSessions(parsed.sessions);
+        if (parsed.scenes?.length) setScenes(parsed.scenes);
+        if (parsed.references?.length) setReferences(parsed.references);
+      }
+    } catch {
+      localStorage.removeItem("dm-script-web-state-v1");
+    } finally {
+      setIsHydratedFromStorage(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isHydratedFromStorage) return;
+    localStorage.setItem(
+      "dm-script-web-state-v1",
+      JSON.stringify({
+        sessions,
+        scenes,
+        references
+      })
+    );
+  }, [isHydratedFromStorage, references, scenes, sessions]);
 
   const openedSessions = useMemo(
     () => openedSessionIds.map((id) => sessions.find((session) => session.id === id)).filter(Boolean) as DmSession[],
