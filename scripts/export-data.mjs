@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 
 const dbPath = resolve(process.argv[2] ?? "DM Script.store");
 const outputPath = resolve(process.argv[3] ?? "src/data/dm-script.json");
@@ -42,6 +43,50 @@ function splitSharedIds(value) {
     .filter(Boolean);
 }
 
+function scopeCss(css) {
+  return css.replace(/(^|\n)(\s*)([^@\n{}][^{]+)\{/g, (match, lineStart, whitespace, selector) => {
+    const scopedSelector = selector
+      .split(",")
+      .map((part) => `.rtf-document ${part.trim()}`)
+      .join(", ");
+    return `${lineStart}${whitespace}${scopedSelector} {`;
+  });
+}
+
+function htmlFragmentFromCocoaHtml(html) {
+  const style = html.match(/<style[^>]*>([\s\S]*?)<\/style>/i)?.[1] ?? "";
+  const body = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] ?? "";
+  if (!body.trim()) return null;
+
+  return `<style>${scopeCss(style)}</style><div class="rtf-document">${body.trim()}</div>`;
+}
+
+const tempDir = mkdtempSync(join(tmpdir(), "dm-script-export-"));
+
+function richTextHtmlForScene(sceneId) {
+  const rtfPath = join(tempDir, `${sceneId}.rtf`);
+  const bytes = execFileSync(
+    "sqlite3",
+    [
+      dbPath,
+      `SELECT writefile('${rtfPath.replaceAll("'", "''")}', ZRICHTEXTDATA) FROM ZSCENEDOCUMENT WHERE lower(hex(ZID))='${sceneId}';`
+    ],
+    { encoding: "utf8" }
+  ).trim();
+
+  if (!bytes || bytes === "0") return null;
+
+  try {
+    const html = execFileSync("textutil", ["-convert", "html", "-stdout", rtfPath], {
+      encoding: "utf8",
+      maxBuffer: 1024 * 1024 * 80
+    });
+    return htmlFragmentFromCocoaHtml(html);
+  } catch {
+    return null;
+  }
+}
+
 const sessions = query(`
   SELECT
     lower(hex(ZID)) AS id,
@@ -68,6 +113,7 @@ const scenes = query(`
     ZTITLE AS title,
     ZSORTINDEX AS sortIndex,
     ZPLAINTEXTCACHE AS plainText,
+    length(ZRICHTEXTDATA) AS richTextLength,
     ZMASTERNOTES AS masterNotes,
     ZCREATEDAT AS createdAt,
     ZUPDATEDAT AS updatedAt
@@ -79,6 +125,7 @@ const scenes = query(`
   title: text(row.title) || "Без названия",
   sortIndex: Number(row.sortIndex ?? 0),
   plainText: text(row.plainText),
+  richTextHtml: Number(row.richTextLength ?? 0) > 0 ? richTextHtmlForScene(blobId(row.id)) : null,
   masterNotes: nullable(row.masterNotes),
   createdAt: fromAppleDate(row.createdAt),
   updatedAt: fromAppleDate(row.updatedAt)
@@ -158,5 +205,6 @@ const library = {
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, `${JSON.stringify(library, null, 2)}\n`, "utf8");
+rmSync(tempDir, { recursive: true, force: true });
 
 console.log(`Exported ${sessions.length} sessions, ${scenes.length} scenes, ${references.length} references, ${textReferences.length} links.`);

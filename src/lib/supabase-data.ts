@@ -46,6 +46,7 @@ function camelScene(row: Record<string, unknown>): DmScene {
     title: String(row.title ?? "Без названия"),
     sortIndex: Number(row.sort_index ?? 0),
     plainText: String(row.plain_text ?? ""),
+    richTextHtml: typeof row.rich_text_html === "string" ? row.rich_text_html : null,
     masterNotes: typeof row.master_notes === "string" ? row.master_notes : null,
     createdAt: typeof row.created_at === "string" ? row.created_at : null,
     updatedAt: typeof row.updated_at === "string" ? row.updated_at : null

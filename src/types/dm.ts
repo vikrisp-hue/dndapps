@@ -15,6 +15,7 @@ export type DmScene = {
   title: string;
   sortIndex: number;
   plainText: string;
+  richTextHtml: string | null;
   masterNotes: string | null;
   createdAt: string | null;
   updatedAt: string | null;

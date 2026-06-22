@@ -43,13 +43,14 @@ on conflict (id) do update set
 lines.push("");
 
 for (const scene of data.scenes) {
-  lines.push(`insert into public.dm_scenes (id, session_id, title, sort_index, plain_text, master_notes, created_at, updated_at)
-values (${sql(scene.id)}::uuid, ${sql(scene.sessionId)}::uuid, ${sql(scene.title)}, ${num(scene.sortIndex)}, ${sql(scene.plainText)}, ${sql(scene.masterNotes)}, ${sql(scene.createdAt)}::timestamptz, ${sql(scene.updatedAt)}::timestamptz)
+  lines.push(`insert into public.dm_scenes (id, session_id, title, sort_index, plain_text, rich_text_html, master_notes, created_at, updated_at)
+values (${sql(scene.id)}::uuid, ${sql(scene.sessionId)}::uuid, ${sql(scene.title)}, ${num(scene.sortIndex)}, ${sql(scene.plainText)}, ${sql(scene.richTextHtml)}, ${sql(scene.masterNotes)}, ${sql(scene.createdAt)}::timestamptz, ${sql(scene.updatedAt)}::timestamptz)
 on conflict (id) do update set
   session_id = excluded.session_id,
   title = excluded.title,
   sort_index = excluded.sort_index,
   plain_text = excluded.plain_text,
+  rich_text_html = excluded.rich_text_html,
   master_notes = excluded.master_notes,
   created_at = excluded.created_at,
   updated_at = excluded.updated_at;`);

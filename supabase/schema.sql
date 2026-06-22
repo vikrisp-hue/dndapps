@@ -13,6 +13,7 @@ create table if not exists public.dm_scenes (
   title text not null,
   sort_index double precision not null default 0,
   plain_text text not null default '',
+  rich_text_html text,
   master_notes text,
   created_at timestamptz,
   updated_at timestamptz
