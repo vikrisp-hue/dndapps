@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700" role="img" aria-label="abstract campaign table texture">
+  <defs>
+    <linearGradient id="wash" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f7f7f3"/>
+      <stop offset="0.45" stop-color="#ecefee"/>
+      <stop offset="1" stop-color="#f6f1e7"/>
+    </linearGradient>
+    <pattern id="grid" width="56" height="56" patternUnits="userSpaceOnUse">
+      <path d="M56 0H0v56" fill="none" stroke="#a9b4ad" stroke-opacity=".22" stroke-width="1"/>
+      <circle cx="0" cy="0" r="2" fill="#9a3d4d" fill-opacity=".18"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="700" fill="url(#wash)"/>
+  <rect width="900" height="700" fill="url(#grid)"/>
+  <path d="M92 525C226 366 313 467 445 312S672 117 811 196" fill="none" stroke="#2f6f62" stroke-opacity=".22" stroke-width="10" stroke-linecap="round"/>
+  <path d="M72 145c142 44 204 5 323 71 104 58 204 148 423 91" fill="none" stroke="#9a3d4d" stroke-opacity=".18" stroke-width="8" stroke-linecap="round"/>
+  <g fill="none" stroke="#ad812f" stroke-opacity=".28" stroke-width="2">
+    <circle cx="222" cy="224" r="70"/>
+    <circle cx="222" cy="224" r="33"/>
+    <path d="M222 132v184M130 224h184M158 160l128 128M286 160 158 288"/>
+  </g>
+  <g fill="#17191a" fill-opacity=".08">
+    <circle cx="694" cy="510" r="100"/>
+    <circle cx="694" cy="510" r="54" fill="#2f6f62" fill-opacity=".08"/>
+    <circle cx="742" cy="458" r="17" fill="#9a3d4d" fill-opacity=".12"/>
+  </g>
+</svg>
